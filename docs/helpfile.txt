@@ -1,0 +1,179 @@
+Help on module csv2opd:
+
+NAME
+    csv2opd
+
+DESCRIPTION
+    # CSV2OPD parses each row of a CSV file into a separate OPD file
+    # and names each new file after the value contained in the Name field.
+    #
+    # The CSV file must have a header and mustn't have an "OPDObject type"
+    # colon.
+
+CLASSES
+    builtins.object
+        GUI
+        Parser
+    
+    class GUI(builtins.object)
+     |  GUI(master)
+     |  
+     |  This class provides the graphical user interface to the application.
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, master)
+     |      This method is called when the object gui is created from GUI.
+     |      
+     |      :param master: This is the parent widget of the window.
+     |  
+     |  conversion_completed()
+     |      This method is called at the end of parser.converter.
+     |      
+     |      :returns: It returns a message and clears gui.e1 and gui.e2.
+     |  
+     |  do_parser(self)
+     |      This method is called when the user clicks the Convert button.
+     |      
+     |      :returns: If one or more fields are empty, it returns an error message.
+     |      If all the fields are fullfiled, it returns the parameters csvFile,
+     |      xmlFile and separator into the class Parser.
+     |  
+     |  import_csv(self)
+     |      This method is called when the user clicks the Input CSV Browse
+     |      button.
+     |      
+     |      :returns: It returns the path of the CSV into gui.e1.
+     |  
+     |  output_directory(self)
+     |      This method is called when the user clicks the Output Directory
+     |      button.
+     |      
+     |      :returns: It returns the path of the output directory into gui.e2.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Parser(builtins.object)
+     |  Parser(csvFile, xmlFile, separator)
+     |  
+     |  This class provides the functionality to the application.
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, csvFile, xmlFile, separator)
+     |      This method is called when the object parser is created from Parser.
+     |      
+     |      :param csvFile: This is the path of the output file.
+     |      :param xmlFile: This is the path of the output directory.
+     |      :param separator: This is the type of delimiter used by the CSV file.
+     |  
+     |  converter(self)
+     |      This method transforms each row of a given CSV file into separate OPD
+     |      files and names each new file after the value contained in the Name
+     |      field.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    ACTIVE = 'active'
+    ALL = 'all'
+    ANCHOR = 'anchor'
+    ARC = 'arc'
+    BASELINE = 'baseline'
+    BEVEL = 'bevel'
+    BOTH = 'both'
+    BOTTOM = 'bottom'
+    BROWSE = 'browse'
+    BUTT = 'butt'
+    CASCADE = 'cascade'
+    CENTER = 'center'
+    CHAR = 'char'
+    CHECKBUTTON = 'checkbutton'
+    CHORD = 'chord'
+    COMMAND = 'command'
+    CURRENT = 'current'
+    DISABLED = 'disabled'
+    DOTBOX = 'dotbox'
+    E = 'e'
+    END = 'end'
+    EW = 'ew'
+    EXCEPTION = 8
+    EXTENDED = 'extended'
+    FALSE = 0
+    FIRST = 'first'
+    FLAT = 'flat'
+    GROOVE = 'groove'
+    HIDDEN = 'hidden'
+    HORIZONTAL = 'horizontal'
+    INSERT = 'insert'
+    INSIDE = 'inside'
+    LAST = 'last'
+    LEFT = 'left'
+    MITER = 'miter'
+    MOVETO = 'moveto'
+    MULTIPLE = 'multiple'
+    N = 'n'
+    NE = 'ne'
+    NO = 0
+    NONE = 'none'
+    NORMAL = 'normal'
+    NS = 'ns'
+    NSEW = 'nsew'
+    NUMERIC = 'numeric'
+    NW = 'nw'
+    OFF = 0
+    ON = 1
+    OUTSIDE = 'outside'
+    PAGES = 'pages'
+    PIESLICE = 'pieslice'
+    PROJECTING = 'projecting'
+    RADIOBUTTON = 'radiobutton'
+    RAISED = 'raised'
+    READABLE = 2
+    RIDGE = 'ridge'
+    RIGHT = 'right'
+    ROUND = 'round'
+    S = 's'
+    SCROLL = 'scroll'
+    SE = 'se'
+    SEL = 'sel'
+    SEL_FIRST = 'sel.first'
+    SEL_LAST = 'sel.last'
+    SEPARATOR = 'separator'
+    SINGLE = 'single'
+    SOLID = 'solid'
+    SUNKEN = 'sunken'
+    SW = 'sw'
+    TOP = 'top'
+    TRUE = 1
+    TclVersion = 8.6
+    TkVersion = 8.6
+    UNDERLINE = 'underline'
+    UNITS = 'units'
+    VERTICAL = 'vertical'
+    W = 'w'
+    WORD = 'word'
+    WRITABLE = 4
+    X = 'x'
+    Y = 'y'
+    YES = 1
+    wantobjects = 1
+
+FILE
+    /home/re-l/git proyectos/csv2opd/csv2opd.py
+
+
