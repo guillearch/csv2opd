@@ -85,7 +85,7 @@ class GUI():
         self.e1.grid(row=0, column=1)
         self.e2.grid(row=1, column=1)
 
-        self.separator = {'Tab': '   ',
+        self.separator = {'Tab': '\t',
                           'Comma': ',',
                           'Semicolon': ';',
                           'Colon': ':',
@@ -129,16 +129,10 @@ class GUI():
         If all the fields are fullfiled, it returns the parameters csvFile,
         xmlFile and separator into the class Parser.
         '''
-        if self.e1.get() == '' and self.e2.get() == '':
-            messagebox.showinfo('Error', 'You must select a CSV file'
-                                ' and an output directory.')
-        elif self.e1.get() == '':
-            messagebox.showinfo('Error', 'You must select a CSV file.')
-        elif self.e2.get() == '':
-            messagebox.showinfo('Error', 'You must select an output'
-                                ' directory.')
-        else:
+        try:
             Parser(self.e1.get(), self.e2.get(), self.v.get())
+        except OSError as e:
+            messagebox.showerror('Error', e.strerror)
 
     def conversion_completed():
         '''This method is called at the end of parser.converter.
