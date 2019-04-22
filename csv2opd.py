@@ -43,10 +43,9 @@ class Parser():
             else:
                 xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
                 for i in range(len(tags)):
-                    xmlData.write('<Attr Name="' + tags[i] + '">'
-                                  + row[i] + '</Attr>' + '\n')
+                    xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
                     if tags[i] == 'Name':
-                        os.rename('xmlFile.xml', row[i] + '.opd')
+                        os.rename('xmlFile.xml', f'{row[i]}.opd')
                 xmlData.write('</ListAttr></OPDObject>\n')
             rowNum += 1
             xmlData.close()
