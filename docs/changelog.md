@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improvements to error handling.
 - Minor improvements to code style.
 
+### Fixed
+- Bug that affected the selection of the tab separator.
+
 ## [1.0.0] - 2018-10-09
 
 - First release! :tada:
