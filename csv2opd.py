@@ -6,15 +6,15 @@
 
 import csv
 import os
-from tkinter import *
-import tkinter.filedialog
-import tkinter.messagebox
+import tkinter as tk
+import tkinter.filedialog as filedialog
+import tkinter.messagebox as messagebox
 
 
 class Parser():
     '''This class provides the functionality to the application.'''
 
-    def __init__ (self, csvFile, xmlFile, separator):
+    def __init__(self, csvFile, xmlFile, separator):
         '''This method is called when the object parser is created from Parser.
 
         :param csvFile: This is the path of the output file.
@@ -31,9 +31,7 @@ class Parser():
         OPD files and names each new file after the value contained in the Name
         field.
         '''
-        csvData = csv.reader(open(self.csvFile, 'r'),
-                             delimiter = self.separator
-                             )
+        csvData = csv.reader(open(self.csvFile, 'r'), delimiter=self.separator)
 
         os.chdir(self.xmlFile)
 
@@ -45,12 +43,12 @@ class Parser():
             else:
                 xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
                 for i in range(len(tags)):
-                    xmlData.write('<Attr Name="' + tags[i] + '">' \
+                    xmlData.write('<Attr Name="' + tags[i] + '">'
                                   + row[i] + '</Attr>' + '\n')
                     if tags[i] == 'Name':
-                        os.rename ('xmlFile.xml', row[i] + '.opd')
+                        os.rename('xmlFile.xml', row[i] + '.opd')
                 xmlData.write('</ListAttr></OPDObject>\n')
-            rowNum +=1
+            rowNum += 1
             xmlData.close()
 
         GUI.conversion_completed()
@@ -58,6 +56,7 @@ class Parser():
 
 class GUI():
     '''This class provides the graphical user interface to the application.'''
+
     def __init__(self, master):
         '''This method is called when the object gui is created from GUI.
 
@@ -65,35 +64,24 @@ class GUI():
         '''
         self.master = master
 
-        self.label = Label(master,
-                           text='Input CSV'
-                           ).grid(row=0)
-        self.label = Label(master,
-                           text='Output Directory'
-                           ).grid(row=1)
-        self.label = Label(master,
-                           text='Column delimiter'
-                           ).grid(row=2)
+        W = tk.W
 
-        self.button = Button(master,
-                             text='Quit',
-                             command=master.quit
-                             ).grid(row=8, column=0, sticky=W, pady=4)
-        self.button = Button(master,
-                             text='Browse',
-                             command=self.import_csv
-                             ).grid(row=0, column=2, sticky=W, pady=4)
-        self.button = Button(master,
-                             text='Browse',
-                             command=self.output_directory
-                             ).grid(row=1, column=2, sticky=W, pady=4)
-        self.button = Button(master,
-                             text='Convert',
-                             command=self.do_parser
-                             ).grid(row=8, column=1, sticky=W, pady=4)
+        self.label = tk.Label(master, text='Input CSV').grid(row=0)
+        self.label = tk.Label(master, text='Output Directory').grid(row=1)
+        self.label = tk.Label(master, text='Column delimiter').grid(row=2)
 
-        self.e1 = Entry(master)
-        self.e2 = Entry(master)
+        self.button = tk.Button(master, text='Quit', command=master.quit
+                                ).grid(row=8, column=0, sticky=W, pady=4)
+        self.button = tk.Button(master, text='Browse', command=self.import_csv
+                                ).grid(row=0, column=2, sticky=W, pady=4)
+        self.button = tk.Button(master, text='Browse',
+                                command=self.output_directory
+                                ).grid(row=1, column=2, sticky=W, pady=4)
+        self.button = tk.Button(master, text='Convert', command=self.do_parser
+                                ).grid(row=8, column=1, sticky=W, pady=4)
+
+        self.e1 = tk.Entry(master)
+        self.e2 = tk.Entry(master)
         self.e1.grid(row=0, column=1)
         self.e2.grid(row=1, column=1)
 
@@ -102,17 +90,15 @@ class GUI():
                           'Semicolon': ';',
                           'Colon': ':',
                           'Space': ' ',
-                          'Pipe': '|'
-                          }
-        self.v = tkinter.StringVar()
+                          'Pipe': '|'}
+
+        self.v = tk.StringVar()
         self.v.set(self.separator['Tab'])
         i = 0
         for val, separator in enumerate(self.separator):
-            tkinter.Radiobutton(root,
-                                text=separator,padx=20,
-                                variable=self.v,
-                                value=self.separator[separator]
-                                ).grid(row=2 + i, sticky=W, column=1)
+            tk.Radiobutton(root, text=separator, padx=20,
+                           variable=self.v, value=self.separator[separator]
+                           ).grid(row=2 + i, sticky=W, column=1)
             i += 1
 
     def import_csv(self):
@@ -121,13 +107,9 @@ class GUI():
 
         :returns: It returns the path of the CSV into gui.e1.
         '''
-        file = tkinter.filedialog.askopenfile(parent=root,
-                                              mode='rb',
-                                              title='Choose the CSV file to' \
-                                              ' convert',
-                                              filetypes=[('CSV files',
-                                                          '*.csv')]
-                                              )
+        file = filedialog.askopenfile(parent=root, mode='rb',
+                                      title='Choose the CSV file to convert',
+                                      filetypes=[('CSV files', '*.csv')])
         self.e1.insert(0, file.name)
 
     def output_directory(self):
@@ -136,10 +118,8 @@ class GUI():
 
         :returns: It returns the path of the output directory into gui.e2.
         '''
-        directory = tkinter.filedialog.askdirectory(parent=root,
-                                                    title='Choose an output' \
-                                                    ' directory'
-                                                    )
+        directory = filedialog.askdirectory(parent=root,
+                                            title='Choose an output directory')
         self.e2.insert(0, directory)
 
     def do_parser(self):
@@ -150,29 +130,29 @@ class GUI():
         xmlFile and separator into the class Parser.
         '''
         if self.e1.get() == '' and self.e2.get() == '':
-            tkinter.messagebox.showinfo('Error', 'You must select a CSV file' \
-                                        ' and an output directory.')
+            messagebox.showinfo('Error', 'You must select a CSV file'
+                                ' and an output directory.')
         elif self.e1.get() == '':
-            tkinter.messagebox.showinfo('Error', 'You must select a CSV file.')
+            messagebox.showinfo('Error', 'You must select a CSV file.')
         elif self.e2.get() == '':
-            tkinter.messagebox.showinfo('Error', 'You must select an output' \
-                                        ' directory.')
+            messagebox.showinfo('Error', 'You must select an output'
+                                ' directory.')
         else:
-            parser = Parser(self.e1.get(), self.e2.get(), self.v.get())
+            Parser(self.e1.get(), self.e2.get(), self.v.get())
 
     def conversion_completed():
         '''This method is called at the end of parser.converter.
 
         :returns: It returns a message and clears gui.e1 and gui.e2.
         '''
-        tkinter.messagebox.showinfo('Info', 'Conversion completed!')
-        gui.e1.delete(0, END)
-        gui.e2.delete(0, END)
+        messagebox.showinfo('Info', 'Conversion completed!')
+        gui.e1.delete(0, tk.END)
+        gui.e2.delete(0, tk.END)
 
 
 if __name__ == '__main__':
     '''This statement runs the application.'''
-    root = Tk()
+    root = tk.Tk()
     root.title('CSV2OPD v1.0.0')
     gui = GUI(root)
     root.mainloop()
