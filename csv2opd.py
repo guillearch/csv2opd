@@ -41,16 +41,19 @@ class Parser():
             if rowNum == 0:
                 tags = row
             else:
-                xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
-                for i in range(len(tags)):
-                    xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
-                    if tags[i] == 'Name':
-                        os.rename('xmlFile.xml', f'{row[i]}.opd')
-                xmlData.write('</ListAttr></OPDObject>\n')
+                self.write_xml(rowNum, row, xmlData, tags)
             rowNum += 1
             xmlData.close()
 
-        GUI.conversion_completed()
+        gui.conversion_completed()
+
+    def write_xml(self, rowNum, row, xmlData, tags):
+        xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
+        for i in range(len(tags)):
+            xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
+            if tags[i] == 'Name':
+                os.rename('xmlFile.xml', f'{row[i]}.opd')
+        xmlData.write('</ListAttr></OPDObject>\n')
 
 
 class GUI():
@@ -104,7 +107,7 @@ class GUI():
         '''This method is called when the user clicks the Input CSV Browse
         button.
 
-        :returns: It returns the path of the CSV into gui.e1.
+        :returns: It returns the path of the CSV into GUI.e1.
         '''
         file = filedialog.askopenfile(parent=root, mode='rb',
                                       title='Choose the CSV file to convert',
@@ -115,7 +118,7 @@ class GUI():
         '''This method is called when the user clicks the Output Directory
         button.
 
-        :returns: It returns the path of the output directory into gui.e2.
+        :returns: It returns the path of the output directory into self.e2.
         '''
         directory = filedialog.askdirectory(parent=root,
                                             title='Choose an output directory')
@@ -133,19 +136,19 @@ class GUI():
         except OSError as e:
             messagebox.showerror('Error', e.strerror)
 
-    def conversion_completed():
+    def conversion_completed(self):
         '''This method is called at the end of parser.converter.
 
         :returns: It returns a message and clears gui.e1 and gui.e2.
         '''
         messagebox.showinfo('Info', 'Conversion completed!')
-        gui.e1.delete(0, tk.END)
-        gui.e2.delete(0, tk.END)
+        self.e1.delete(0, tk.END)
+        self.e2.delete(0, tk.END)
 
 
 if __name__ == '__main__':
     '''This statement runs the application.'''
     root = tk.Tk()
-    root.title('CSV2OPD v1.0.0')
+    root.title('CSV2OPD v1.1.0')
     gui = GUI(root)
     root.mainloop()
