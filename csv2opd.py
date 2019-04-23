@@ -6,6 +6,7 @@
 
 import csv
 import os
+import sys
 import tkinter as tk
 import tkinter.filedialog as filedialog
 import tkinter.messagebox as messagebox
@@ -32,28 +33,37 @@ class Parser():
         field.
         '''
         csvData = csv.reader(open(self.csvFile, 'r'), delimiter=self.separator)
+        # regex to check if delimiter matches separator between words in row 0
+        # raise exception if it isn't the case
 
         os.chdir(self.xmlFile)
 
         rowNum = 0
+        errors = 0
         for row in csvData:
             xmlData = open('xmlFile.xml', 'w')
             if rowNum == 0:
                 tags = row
             else:
-                self.write_xml(rowNum, row, xmlData, tags)
+                self.write_xml(rowNum, row, xmlData, tags, errors)
             rowNum += 1
             xmlData.close()
 
-        gui.conversion_completed()
+        gui.conversion_completed(errors)
 
-    def write_xml(self, rowNum, row, xmlData, tags):
+    def write_xml(self, rowNum, row, xmlData, tags, errors):
         xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
-        for i in range(len(tags)):
-            xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
-            if tags[i] == 'Name':
-                os.rename('xmlFile.xml', f'{row[i]}.opd')
-        xmlData.write('</ListAttr></OPDObject>\n')
+        try:
+            for i in range(len(tags)):
+                xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
+                if tags[i] == 'Name':
+                    fileName = row[i]
+                    os.rename('xmlFile.xml', f'{fileName}.opd')
+            xmlData.write('</ListAttr></OPDObject>\n')
+        except IndexError:
+            errors += 1
+            os.remove(f'{fileName}.opd')
+            gui.conversion_warning(rowNum)
 
 
 class GUI():
@@ -136,14 +146,30 @@ class GUI():
         except OSError as e:
             messagebox.showerror('Error', e.strerror)
 
-    def conversion_completed(self):
+    def conversion_completed(self, errors):
         '''This method is called at the end of parser.converter.
 
         :returns: It returns a message and clears gui.e1 and gui.e2.
         '''
-        messagebox.showinfo('Info', 'Conversion completed!')
+        if errors == 0:
+            messagebox.showinfo('Info', 'Conversion completed!')
+        elif errors == 1:
+            messagebox.showinfo('Info', 'Conversion completed with 1 error.')
+        else:
+            messagebox.showinfo('Info',
+                                f'Conversion completed with {errors} errors.')
         self.e1.delete(0, tk.END)
         self.e2.delete(0, tk.END)
+
+    def conversion_warning(self, rowNum):
+        '''This method is called if parser.converter throws an exception.'''
+        msg = messagebox.askquestion('Warning',
+                                     'There was an error converting row '
+                                     f'{rowNum}. Do you want to continue?')
+        if msg == 'no':
+            messagebox.showinfo('Info',
+                                f'Conversion interrumped at row {rowNum}.')
+            sys.exit()
 
 
 if __name__ == '__main__':
