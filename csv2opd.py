@@ -12,6 +12,13 @@ import tkinter.filedialog as filedialog
 import tkinter.messagebox as messagebox
 
 
+class DelimiterError(Exception):
+    '''Custom exception that is raised when the column delimiter selected by
+    the user does not match the actual CSV delimiter.
+    '''
+    pass
+
+
 class Parser():
     '''This class provides the functionality to the application.'''
 
@@ -22,9 +29,13 @@ class Parser():
         :param xmlFile: This is the path of the output directory.
         :param separator: This is the type of delimiter used by the CSV file.
         '''
+        dialect = csv.Sniffer().sniff(open(csvFile, 'r').readline()).delimiter
+
         self.csvFile = csvFile
         self.xmlFile = xmlFile
         self.separator = separator
+        self.dialect = dialect
+
         self.converter()
 
     def converter(self):
@@ -32,9 +43,15 @@ class Parser():
         OPD files and names each new file after the value contained in the Name
         field.
         '''
-        csvData = csv.reader(open(self.csvFile, 'r'), delimiter=self.separator)
-        # regex to check if delimiter matches separator between words in row 0
-        # raise exception if it isn't the case
+        try:
+            csvData = csv.reader(open(self.csvFile, 'r'),
+                                 delimiter=self.separator)
+            if self.separator is not self.dialect:
+                raise DelimiterError
+        except DelimiterError:
+            messagebox.showerror('Error', f'Separator "{self.dialect}" '
+                                 f'expected, got "{self.separator}".')
+            sys.exit()
 
         os.chdir(self.xmlFile)
 
@@ -147,7 +164,7 @@ class GUI():
             messagebox.showerror('Error', e.strerror)
 
     def conversion_completed(self, errors):
-        '''This method is called at the end of parser.converter.
+        '''This method is called at the end of Parser.converter.
 
         :returns: It returns a message and clears gui.e1 and gui.e2.
         '''
@@ -162,13 +179,13 @@ class GUI():
         self.e2.delete(0, tk.END)
 
     def conversion_warning(self, rowNum):
-        '''This method is called if parser.converter throws an exception.'''
+        '''This method is called if Parser.converter throws an exception.'''
         msg = messagebox.askquestion('Warning',
                                      'There was an error converting row '
                                      f'{rowNum}. Do you want to continue?')
         if msg == 'no':
             messagebox.showinfo('Info',
-                                f'Conversion interrumped at row {rowNum}.')
+                                f'Conversion interrupted at row {rowNum}.')
             sys.exit()
 
 
