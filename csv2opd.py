@@ -1,8 +1,6 @@
 # CSV2OPD parses each row of a CSV file into a separate OPD file
 # and names each new file after the value contained in the Name field.
-#
-# The CSV file must have a header and must not have an "OPDObject type"
-# column.
+# The CSV file must have a header.
 
 import csv
 import os
