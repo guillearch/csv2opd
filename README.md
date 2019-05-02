@@ -48,7 +48,7 @@ unzip master.zip
 ## Running the application
 
 1. Open the directory `/csv2opd` and run the application by entering the following command: `python csv2opd.py`.
-2. Select the input CSV file. It must have a header and must not have an "OPDObject type" column.
+2. Select the input CSV file. It must have a header.
 3. Select the output directory for the XML files.
 4. Select the type of field separator (delimiter) used by your CSV file.
 5. Click the button Convert.

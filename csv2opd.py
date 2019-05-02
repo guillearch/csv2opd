@@ -72,6 +72,8 @@ class Parser():
         xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
         try:
             for i in range(len(tags)):
+                if tags[i] == 'OPDObject type':
+                    continue
                 xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
                 if tags[i] == 'Name':
                     fileName = row[i]

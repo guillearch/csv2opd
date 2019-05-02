@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Option to stop or continue the conversion after the loop encounters an error.
 - Option to pass the parameters as command line arguments.
-- Automatic deletion of the "OPDObject type" column if it exists in the CSV file.
+- Skipping the "OPDObject type" column if it exists in the CSV file.
 - Setup script and uploaded to PyPI.
 - Unit tests.
 
