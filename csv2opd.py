@@ -1,6 +1,12 @@
-# CSV2OPD parses each row of a CSV file into a separate OPD file
-# and names each new file after the value contained in the Name field.
-# The CSV file must have a header.
+"""CSV2OPD.
+
+This module parses each row of a given CSV file into separate OPD files and
+names each new file after the value contained in the Name field.
+
+OPD is the XML implementation used by the open source DMS OpenProdoc.
+
+The CSV file must have a header. The 'OPDObject type' column is optional.
+"""
 
 import csv
 import os
@@ -11,22 +17,32 @@ import tkinter.messagebox as messagebox
 
 
 class DelimiterError(Exception):
-    '''Custom exception that is raised when the column delimiter selected by
-    the user does not match the actual CSV delimiter.
-    '''
+    """Custom exception raised if the separator is not valid.
+
+    Raises an exception if the column delimiter selected by the user does
+    not match the actual CSV delimiter.
+    """
     pass
 
 
 class Parser():
-    '''This class provides the functionality to the application.'''
+    """Provides the functionality to the application.
+
+    Attributes:
+        csvFile: Path to the input CSV file.
+        xmlFile: Path to the input CSV file.
+        separator: Delimiter selected by the user.
+        dialect: Delimiter actually used in the CSV file.
+    """
 
     def __init__(self, csvFile, xmlFile, separator):
-        '''This method is called when the object parser is created from Parser.
+        """Inits Parser with check_separator method.
 
-        :param csvFile: This is the path of the output file.
-        :param xmlFile: This is the path of the output directory.
-        :param separator: This is the type of delimiter used by the CSV file.
-        '''
+        Args:
+            csvFile: Path to the input CSV file.
+            xmlFile: Path to the input CSV file.
+            separator: Delimiter selected by the user.
+        """
         dialect = csv.Sniffer().sniff(open(csvFile, 'r').readline()).delimiter
 
         self.csvFile = csvFile
@@ -34,23 +50,40 @@ class Parser():
         self.separator = separator
         self.dialect = dialect
 
-        self.converter()
+        self.check_separator()
 
-    def converter(self):
-        '''This method transforms each row of a given CSV file into separate
-        OPD files and names each new file after the value contained in the Name
-        field.
-        '''
+    def check_separator(self):
+        """Validates the separator selected by the user.
+
+        Displays an error message and terminates the application if the
+        separator does not match the actual CSV separator. Executes converter
+        method otherwise.
+
+        Raises:
+            DelimiterError: If separator does not match dialect.
+        """
         try:
             csvData = csv.reader(open(self.csvFile, 'r'),
                                  delimiter=self.separator)
             if self.separator is not self.dialect:
                 raise DelimiterError
+            else:
+                self.converter(csvData)
         except DelimiterError:
             messagebox.showerror('Error', f'Separator "{self.dialect}" '
                                  f'expected, got "{self.separator}".')
             sys.exit()
 
+    def converter(self, csvData):
+        """Converts the CSV file into separate OPD files.
+
+        Transforms each row of the input CSV file into separate OPD files
+        and names each new file after the value contained in the Name
+        field, using write_xml internal method.
+
+        Args:
+            csvData: Content of the input CSV file.
+        """
         os.chdir(self.xmlFile)
 
         rowNum = 0
@@ -60,13 +93,26 @@ class Parser():
             if rowNum == 0:
                 tags = row
             else:
-                self.write_xml(rowNum, row, xmlData, tags, errors)
+                self._write_xml(rowNum, row, xmlData, tags, errors)
             rowNum += 1
             xmlData.close()
 
         gui.conversion_completed(errors)
 
-    def write_xml(self, rowNum, row, xmlData, tags, errors):
+    def _write_xml(self, rowNum, row, xmlData, tags, errors):
+        """Writes the output OPD files.
+
+        Args:
+            rowNum: Number of times the loop has iterated through csvData.
+            row: Current row.
+            xmlData: Content of the current output XML file.
+            tags: Tags used for the output XML files.
+            errors: Number of errors that the conversion loop has encountered.
+
+        Raises:
+            IndexError: If the number of fields in the current row is not equal
+            to the number of headers of the input CSV file.
+        """
         xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
         try:
             for i in range(len(tags)):
@@ -84,13 +130,24 @@ class Parser():
 
 
 class GUI():
-    '''This class provides the graphical user interface to the application.'''
+    """Provides the graphical user interface to the application.
+
+    Attributes:
+        master: Parent widget of the window.
+        label: Label widgets of the window.
+        button: Button widgets of the window.
+        e1: Entry widget for the path to the input CSV file.
+        e2: Entry widget for the path to the output XML files directory.
+        separator: CSV delimiter selected by the user.
+        v: StringVar instance used to get the separator value.
+    """
 
     def __init__(self, master):
-        '''This method is called when the object gui is created from GUI.
+        """Inits GUI.
 
-        :param master: This is the parent widget of the window.
-        '''
+        Args:
+            master: Parent widget of the window.
+        """
         self.master = master
 
         W = tk.W
@@ -131,43 +188,39 @@ class GUI():
             i += 1
 
     def import_csv(self):
-        '''This method is called when the user clicks the Input CSV Browse
-        button.
-
-        :returns: It returns the path of the CSV into GUI.e1.
-        '''
+        """Broswes the input CSV file."""
         file = filedialog.askopenfile(parent=root, mode='rb',
                                       title='Choose the CSV file to convert',
                                       filetypes=[('CSV files', '*.csv')])
         self.e1.insert(0, file.name)
 
     def output_directory(self):
-        '''This method is called when the user clicks the Output Directory
-        button.
-
-        :returns: It returns the path of the output directory into self.e2.
-        '''
+        """Browses the output XML file directory."""
         directory = filedialog.askdirectory(parent=root,
                                             title='Choose an output directory')
         self.e2.insert(0, directory)
 
     def do_parser(self):
-        '''This method is called when the user clicks the Convert button.
+        """Executes Parser.__init__ if csvFile and xmlFile are valid.
 
-        :returns: If one or more fields are empty, it returns an error message.
-        If all the fields are fullfiled, it returns the parameters csvFile,
-        xmlFile and separator into the class Parser.
-        '''
+        Raises:
+            OSError: If one or more fields are empty or have an invalid path.
+        """
         try:
             Parser(self.e1.get(), self.e2.get(), self.v.get())
         except OSError as e:
             messagebox.showerror('Error', e.strerror)
 
     def conversion_completed(self, errors):
-        '''This method is called at the end of Parser.converter.
+        """Shows the result of the conversion.
 
-        :returns: It returns a message and clears gui.e1 and gui.e2.
-        '''
+        Evaluates the number of errors and displays a message box with the
+        result of the conversion (completed without errors, completed with
+        1 error or converted with 2 or more errors.)
+
+        Args:
+            errors: Number of errors that the conversion loop has encountered.
+        """
         if errors == 0:
             messagebox.showinfo('Info', 'Conversion completed!')
         elif errors == 1:
@@ -179,7 +232,15 @@ class GUI():
         self.e2.delete(0, tk.END)
 
     def conversion_warning(self, rowNum):
-        '''This method is called if Parser.converter throws an exception.'''
+        """Asks the user if they want to stop or continue the conversion.
+
+        Displays a warning message after Parser.converter encounters an error
+        and allows the user to terminates the application or continue the
+        conversion, skipping the row which caused the error.
+
+        Args:
+            rowNum: Number of times the loop has iterated through csvData.
+        """
         msg = messagebox.askquestion('Warning',
                                      'There was an error converting row '
                                      f'{rowNum}. Do you want to continue?')
@@ -190,7 +251,7 @@ class GUI():
 
 
 if __name__ == '__main__':
-    '''This statement runs the application.'''
+    """Executes GUI__init__."""
     root = tk.Tk()
     root.title('CSV2OPD v1.1.0')
     gui = GUI(root)
