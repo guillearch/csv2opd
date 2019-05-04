@@ -1,6 +1,6 @@
 """CSV2OPD.
 
-This module parses each row of a given CSV file into separate OPD files and
+CSV2OPD parses each row of a given CSV file into separate OPD files and
 names each new file after the value contained in the Name field.
 
 OPD is the XML implementation used by the open source DMS OpenProdoc.
@@ -17,12 +17,7 @@ import tkinter.messagebox as messagebox
 
 
 class DelimiterError(Exception):
-    """Custom exception raised if the separator is not valid.
-
-    Raises an exception if the column delimiter selected by the user does
-    not match the actual CSV delimiter.
-    """
-    pass
+    """The column delimiter does not match the CSV dialect."""
 
 
 class Parser():
@@ -36,28 +31,27 @@ class Parser():
     """
 
     def __init__(self, csvFile, xmlFile, separator):
-        """Inits Parser with check_separator method.
+        """Inits Parser.
 
         Args:
             csvFile: Path to the input CSV file.
             xmlFile: Path to the input CSV file.
             separator: Delimiter selected by the user.
         """
-        dialect = csv.Sniffer().sniff(open(csvFile, 'r').readline()).delimiter
-
         self.csvFile = csvFile
         self.xmlFile = xmlFile
         self.separator = separator
-        self.dialect = dialect
+        self.dialect = csv.Sniffer().sniff(
+            open(csvFile, 'r').readline()).delimiter
+        self.csvData = self.read_csv()
+        self.errors = 0
 
-        self.check_separator()
+    def run_parser(self):
+        self.errors = self.converter()
+        gui.conversion_completed(self.errors)
 
-    def check_separator(self):
-        """Validates the separator selected by the user.
-
-        Displays an error message and terminates the application if the
-        separator does not match the actual CSV separator. Executes converter
-        method otherwise.
+    def read_csv(self):
+        """Opens and reads the input CSV file.
 
         Raises:
             DelimiterError: If separator does not match dialect.
@@ -68,38 +62,35 @@ class Parser():
             if self.separator is not self.dialect:
                 raise DelimiterError
             else:
-                self.converter(csvData)
-        except DelimiterError:
+                return csvData
+        except DelimiterError as e:
             messagebox.showerror('Error', f'Separator "{self.dialect}" '
                                  f'expected, got "{self.separator}".')
-            sys.exit()
+            raise e
 
-    def converter(self, csvData):
+    def converter(self):
         """Converts the CSV file into separate OPD files.
 
         Transforms each row of the input CSV file into separate OPD files
         and names each new file after the value contained in the Name
         field, using write_xml internal method.
-
-        Args:
-            csvData: Content of the input CSV file.
         """
         os.chdir(self.xmlFile)
 
         rowNum = 0
-        errors = 0
-        for row in csvData:
+        for row in self.csvData:
             xmlData = open('xmlFile.xml', 'w')
             if rowNum == 0:
                 tags = row
             else:
-                self._write_xml(rowNum, row, xmlData, tags, errors)
+                if not self._write_xml(rowNum, row, xmlData, tags):
+                    self.errors += 1
             rowNum += 1
             xmlData.close()
 
-        gui.conversion_completed(errors)
+        return self.errors
 
-    def _write_xml(self, rowNum, row, xmlData, tags, errors):
+    def _write_xml(self, rowNum, row, xmlData, tags):
         """Writes the output OPD files.
 
         Args:
@@ -107,7 +98,6 @@ class Parser():
             row: Current row.
             xmlData: Content of the current output XML file.
             tags: Tags used for the output XML files.
-            errors: Number of errors that the conversion loop has encountered.
 
         Raises:
             IndexError: If the number of fields in the current row is not equal
@@ -123,10 +113,11 @@ class Parser():
                     fileName = row[i]
                     os.rename('xmlFile.xml', f'{fileName}.opd')
             xmlData.write('</ListAttr></OPDObject>\n')
+            return True
         except IndexError:
-            errors += 1
             os.remove(f'{fileName}.opd')
-            gui.conversion_warning(rowNum)
+            GUI.conversion_warning(self, rowNum)
+            return False
 
 
 class GUI():
@@ -163,7 +154,7 @@ class GUI():
         self.button = tk.Button(master, text='Browse',
                                 command=self.output_directory
                                 ).grid(row=1, column=2, sticky=W, pady=4)
-        self.button = tk.Button(master, text='Convert', command=self.do_parser
+        self.button = tk.Button(master, text='Convert', command=self.parse_csv
                                 ).grid(row=8, column=1, sticky=W, pady=4)
 
         self.e1 = tk.Entry(master)
@@ -200,16 +191,18 @@ class GUI():
                                             title='Choose an output directory')
         self.e2.insert(0, directory)
 
-    def do_parser(self):
-        """Executes Parser.__init__ if csvFile and xmlFile are valid.
+    def parse_csv(self):
+        """Executes Parser.run_parser() if csvFile and xmlFile are valid.
 
         Raises:
             OSError: If one or more fields are empty or have an invalid path.
         """
         try:
-            Parser(self.e1.get(), self.e2.get(), self.v.get())
+            parser = Parser(self.e1.get(), self.e2.get(), self.v.get())
+            parser.run_parser()
         except OSError as e:
             messagebox.showerror('Error', e.strerror)
+            raise e
 
     def conversion_completed(self, errors):
         """Shows the result of the conversion.
