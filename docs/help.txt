@@ -110,25 +110,15 @@ CLASSES
      |      Args:
      |          master: Parent widget of the window.
      |
-     |  conversion_completed(self, errors)
+     |  clean_input(self)
+     |      Cleans the paths input by the user in the entry widgets.
+     |
+     |  conversion_completed(self)
      |      Shows the result of the conversion.
      |
      |      Evaluates the number of errors and displays a message box with the
      |      result of the conversion (completed without errors, completed with
      |      1 error or converted with 2 or more errors.)
-     |
-     |      Args:
-     |          errors: Number of errors that the conversion loop has encountered.
-     |
-     |  conversion_warning(self, rowNum)
-     |      Asks the user if they want to stop or continue the conversion.
-     |
-     |      Displays a warning message after Parser.converter encounters an error
-     |      and allows the user to terminates the application or continue the
-     |      conversion, skipping the row which caused the error.
-     |
-     |      Args:
-     |          rowNum: Number of times the loop has iterated through csvData.
      |
      |  import_csv(self)
      |      Broswes the input CSV file.
@@ -141,6 +131,9 @@ CLASSES
      |
      |      Raises:
      |          OSError: If one or more fields are empty or have an invalid path.
+     |          DelimiterError: If separator does not match dialect.
+     |          IndexError: If the number of fields in the current row is not equal
+     |          to the number of headers of the input CSV file.
      |
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
@@ -161,6 +154,8 @@ CLASSES
      |      xmlFile: Path to the input CSV file.
      |      separator: Delimiter selected by the user.
      |      dialect: Delimiter actually used in the CSV file.
+     |      csvData: Content of the input CSV file.
+     |      rowNum: Number of times the loop has iterated through csvData.
      |
      |  Methods defined here:
      |
@@ -182,11 +177,6 @@ CLASSES
      |  read_csv(self)
      |      Opens and reads the input CSV file.
      |
-     |      Raises:
-     |          DelimiterError: If separator does not match dialect.
-     |
-     |  run_parser(self)
-     |
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
      |
@@ -196,5 +186,9 @@ CLASSES
      |  __weakref__
      |      list of weak references to the object (if defined)
 
+FUNCTIONS
+    main()
+        Starts the application in graphical mode.
+
 FILE
-    https://github.com/guillearch/csv2opd/csv2opd.py
+    https://github.com/guillearch/csv2opd/csv2opd/csv2opd.py

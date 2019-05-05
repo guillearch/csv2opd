@@ -9,17 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Option to pass the parameters as command line arguments.
+- Option to stop or continue the conversion after the loop encounters an error.
+
+## [1.1.1] - 2019-05-05
+
+### Fixed
+- Error in PyPi setup.
 
 ## [1.1.0] - 2019-05-05
 
 ### Added
-- Option to stop or continue the conversion after the loop encounters an error.
 - Skipping the "OPDObject type" column if it exists in the CSV file.
-- Setup script and uploaded to PyPI.
+- PyPi setup to install the application using pip.
+- Option to run the application as a console script.
 - Unit tests.
 
 ### Changed
 - Improvements to error handling.
+- Decoupled UI from logic.
+- Project structure.
 - Minor improvements to code style.
 
 ### Fixed
