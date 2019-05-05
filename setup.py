@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="csv2opd",
-    version="1.1.0",
+    version="1.1.1",
     author="Guillermo Castellano",
     author_email="gcastellano@protonmail.com",
     description="A CSV to XML converter for OpenProdoc",
