@@ -1,0 +1,200 @@
+Help on module csv2opd:
+
+NAME
+    csv2opd - CSV2OPD.
+
+DESCRIPTION
+    CSV2OPD parses each row of a given CSV file into separate OPD files and
+    names each new file after the value contained in the Name field.
+
+    OPD is the XML implementation used by the open source DMS OpenProdoc.
+
+    The CSV file must have a header. The 'OPDObject type' column is optional.
+
+CLASSES
+    builtins.Exception(builtins.BaseException)
+        DelimiterError
+    builtins.object
+        GUI
+        Parser
+
+    class DelimiterError(builtins.Exception)
+     |  The column delimiter does not match the CSV dialect.
+     |
+     |  Method resolution order:
+     |      DelimiterError
+     |      builtins.Exception
+     |      builtins.BaseException
+     |      builtins.object
+     |
+     |  Data descriptors defined here:
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.Exception:
+     |
+     |  __init__(self, /, *args, **kwargs)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from builtins.Exception:
+     |
+     |  __new__(*args, **kwargs) from builtins.type
+     |      Create and return a new object.  See help(type) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.BaseException:
+     |
+     |  __delattr__(self, name, /)
+     |      Implement delattr(self, name).
+     |
+     |  __getattribute__(self, name, /)
+     |      Return getattr(self, name).
+     |
+     |  __reduce__(...)
+     |      Helper for pickle.
+     |
+     |  __repr__(self, /)
+     |      Return repr(self).
+     |
+     |  __setattr__(self, name, value, /)
+     |      Implement setattr(self, name, value).
+     |
+     |  __setstate__(...)
+     |
+     |  __str__(self, /)
+     |      Return str(self).
+     |
+     |  with_traceback(...)
+     |      Exception.with_traceback(tb) --
+     |      set self.__traceback__ to tb and return self.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from builtins.BaseException:
+     |
+     |  __cause__
+     |      exception cause
+     |
+     |  __context__
+     |      exception context
+     |
+     |  __dict__
+     |
+     |  __suppress_context__
+     |
+     |  __traceback__
+     |
+     |  args
+
+    class GUI(builtins.object)
+     |  GUI(master)
+     |
+     |  Provides the graphical user interface to the application.
+     |
+     |  Attributes:
+     |      master: Parent widget of the window.
+     |      label: Label widgets of the window.
+     |      button: Button widgets of the window.
+     |      e1: Entry widget for the path to the input CSV file.
+     |      e2: Entry widget for the path to the output XML files directory.
+     |      separator: CSV delimiter selected by the user.
+     |      v: StringVar instance used to get the separator value.
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, master)
+     |      Inits GUI.
+     |
+     |      Args:
+     |          master: Parent widget of the window.
+     |
+     |  conversion_completed(self, errors)
+     |      Shows the result of the conversion.
+     |
+     |      Evaluates the number of errors and displays a message box with the
+     |      result of the conversion (completed without errors, completed with
+     |      1 error or converted with 2 or more errors.)
+     |
+     |      Args:
+     |          errors: Number of errors that the conversion loop has encountered.
+     |
+     |  conversion_warning(self, rowNum)
+     |      Asks the user if they want to stop or continue the conversion.
+     |
+     |      Displays a warning message after Parser.converter encounters an error
+     |      and allows the user to terminates the application or continue the
+     |      conversion, skipping the row which caused the error.
+     |
+     |      Args:
+     |          rowNum: Number of times the loop has iterated through csvData.
+     |
+     |  import_csv(self)
+     |      Broswes the input CSV file.
+     |
+     |  output_directory(self)
+     |      Browses the output XML file directory.
+     |
+     |  parse_csv(self)
+     |      Executes Parser.run_parser() if csvFile and xmlFile are valid.
+     |
+     |      Raises:
+     |          OSError: If one or more fields are empty or have an invalid path.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+    class Parser(builtins.object)
+     |  Parser(csvFile, xmlFile, separator)
+     |
+     |  Provides the functionality to the application.
+     |
+     |  Attributes:
+     |      csvFile: Path to the input CSV file.
+     |      xmlFile: Path to the input CSV file.
+     |      separator: Delimiter selected by the user.
+     |      dialect: Delimiter actually used in the CSV file.
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, csvFile, xmlFile, separator)
+     |      Inits Parser.
+     |
+     |      Args:
+     |          csvFile: Path to the input CSV file.
+     |          xmlFile: Path to the input CSV file.
+     |          separator: Delimiter selected by the user.
+     |
+     |  converter(self)
+     |      Converts the CSV file into separate OPD files.
+     |
+     |      Transforms each row of the input CSV file into separate OPD files
+     |      and names each new file after the value contained in the Name
+     |      field, using write_xml internal method.
+     |
+     |  read_csv(self)
+     |      Opens and reads the input CSV file.
+     |
+     |      Raises:
+     |          DelimiterError: If separator does not match dialect.
+     |
+     |  run_parser(self)
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+FILE
+    https://github.com/guillearch/csv2opd/csv2opd.py
