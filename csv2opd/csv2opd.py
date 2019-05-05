@@ -10,7 +10,6 @@ The CSV file must have a header. The 'OPDObject type' column is optional.
 
 import csv
 import os
-import sys
 import tkinter as tk
 import tkinter.filedialog as filedialog
 import tkinter.messagebox as messagebox
@@ -28,6 +27,8 @@ class Parser():
         xmlFile: Path to the input CSV file.
         separator: Delimiter selected by the user.
         dialect: Delimiter actually used in the CSV file.
+        csvData: Content of the input CSV file.
+        rowNum: Number of times the loop has iterated through csvData.
     """
 
     def __init__(self, csvFile, xmlFile, separator):
@@ -44,29 +45,14 @@ class Parser():
         self.dialect = csv.Sniffer().sniff(
             open(csvFile, 'r').readline()).delimiter
         self.csvData = self.read_csv()
-        self.errors = 0
-
-    def run_parser(self):
-        self.errors = self.converter()
-        gui.conversion_completed(self.errors)
+        self.rowNum = 0
 
     def read_csv(self):
-        """Opens and reads the input CSV file.
-
-        Raises:
-            DelimiterError: If separator does not match dialect.
-        """
-        try:
-            csvData = csv.reader(open(self.csvFile, 'r'),
-                                 delimiter=self.separator)
-            if self.separator is not self.dialect:
-                raise DelimiterError
-            else:
-                return csvData
-        except DelimiterError as e:
-            messagebox.showerror('Error', f'Separator "{self.dialect}" '
-                                 f'expected, got "{self.separator}".')
-            raise e
+        """Opens and reads the input CSV file."""
+        csvData = csv.reader(open(self.csvFile, 'r'), delimiter=self.separator)
+        if self.separator is not self.dialect:
+            raise DelimiterError
+        return csvData
 
     def converter(self):
         """Converts the CSV file into separate OPD files.
@@ -77,47 +63,32 @@ class Parser():
         """
         os.chdir(self.xmlFile)
 
-        rowNum = 0
         for row in self.csvData:
             xmlData = open('xmlFile.xml', 'w')
-            if rowNum == 0:
+            if self.rowNum == 0:
                 tags = row
             else:
-                if not self._write_xml(rowNum, row, xmlData, tags):
-                    self.errors += 1
-            rowNum += 1
+                self._write_xml(row, xmlData, tags)
+            self.rowNum += 1
             xmlData.close()
 
-        return self.errors
-
-    def _write_xml(self, rowNum, row, xmlData, tags):
+    def _write_xml(self, row, xmlData, tags):
         """Writes the output OPD files.
 
         Args:
-            rowNum: Number of times the loop has iterated through csvData.
             row: Current row.
             xmlData: Content of the current output XML file.
             tags: Tags used for the output XML files.
-
-        Raises:
-            IndexError: If the number of fields in the current row is not equal
-            to the number of headers of the input CSV file.
         """
         xmlData.write('<OPDObject type="PD_DOCS">\n<ListAttr>\n')
-        try:
-            for i in range(len(tags)):
-                if tags[i] == 'OPDObject type':
-                    continue
-                xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
-                if tags[i] == 'Name':
-                    fileName = row[i]
-                    os.rename('xmlFile.xml', f'{fileName}.opd')
-            xmlData.write('</ListAttr></OPDObject>\n')
-            return True
-        except IndexError:
-            os.remove(f'{fileName}.opd')
-            GUI.conversion_warning(self, rowNum)
-            return False
+        for i in range(len(tags)):
+            if tags[i] == 'OPDObject type':
+                continue
+            xmlData.write(f'<Attr Name="{tags[i]}">{row[i]}</Attr>\n')
+            if tags[i] == 'Name':
+                fileName = row[i]
+                os.rename('xmlFile.xml', f'{fileName}.opd')
+        xmlData.write('</ListAttr></OPDObject>\n')
 
 
 class GUI():
@@ -173,22 +144,21 @@ class GUI():
         self.v.set(self.separator['Tab'])
         i = 0
         for val, separator in enumerate(self.separator):
-            tk.Radiobutton(root, text=separator, padx=20,
+            tk.Radiobutton(text=separator, padx=20,
                            variable=self.v, value=self.separator[separator]
                            ).grid(row=2 + i, sticky=W, column=1)
             i += 1
 
     def import_csv(self):
         """Broswes the input CSV file."""
-        file = filedialog.askopenfile(parent=root, mode='rb',
+        file = filedialog.askopenfile(mode='rb',
                                       title='Choose the CSV file to convert',
                                       filetypes=[('CSV files', '*.csv')])
         self.e1.insert(0, file.name)
 
     def output_directory(self):
         """Browses the output XML file directory."""
-        directory = filedialog.askdirectory(parent=root,
-                                            title='Choose an output directory')
+        directory = filedialog.askdirectory(title='Choose an output directory')
         self.e2.insert(0, directory)
 
     def parse_csv(self):
@@ -196,56 +166,51 @@ class GUI():
 
         Raises:
             OSError: If one or more fields are empty or have an invalid path.
+            DelimiterError: If separator does not match dialect.
+            IndexError: If the number of fields in the current row is not equal
+            to the number of headers of the input CSV file.
         """
         try:
             parser = Parser(self.e1.get(), self.e2.get(), self.v.get())
-            parser.run_parser()
+            parser.converter()
+            self.conversion_completed()
         except OSError as e:
             messagebox.showerror('Error', e.strerror)
+            self.clean_input()
+            raise e
+        except DelimiterError as e:
+            messagebox.showerror('Error', f'Separator "{parser.dialect}" '
+                                 f'expected, got "{parser.separator}".')
+            raise e
+        except IndexError as e:
+            messagebox.showerror('Error', 'There was an error converting row '
+                                 f'{parser.rowNum}.')
+            self.clean_input()
             raise e
 
-    def conversion_completed(self, errors):
+    def conversion_completed(self):
         """Shows the result of the conversion.
 
         Evaluates the number of errors and displays a message box with the
         result of the conversion (completed without errors, completed with
         1 error or converted with 2 or more errors.)
-
-        Args:
-            errors: Number of errors that the conversion loop has encountered.
         """
-        if errors == 0:
-            messagebox.showinfo('Info', 'Conversion completed!')
-        elif errors == 1:
-            messagebox.showinfo('Info', 'Conversion completed with 1 error.')
-        else:
-            messagebox.showinfo('Info',
-                                f'Conversion completed with {errors} errors.')
+        messagebox.showinfo('Info', 'Conversion completed!')
+        self.clean_input()
+
+    def clean_input(self):
+        """Cleans the paths input by the user in the entry widgets."""
         self.e1.delete(0, tk.END)
         self.e2.delete(0, tk.END)
 
-    def conversion_warning(self, rowNum):
-        """Asks the user if they want to stop or continue the conversion.
 
-        Displays a warning message after Parser.converter encounters an error
-        and allows the user to terminates the application or continue the
-        conversion, skipping the row which caused the error.
-
-        Args:
-            rowNum: Number of times the loop has iterated through csvData.
-        """
-        msg = messagebox.askquestion('Warning',
-                                     'There was an error converting row '
-                                     f'{rowNum}. Do you want to continue?')
-        if msg == 'no':
-            messagebox.showinfo('Info',
-                                f'Conversion interrupted at row {rowNum}.')
-            sys.exit()
+def main():
+    """Starts the application in graphical mode."""
+    root = tk.Tk()
+    root.title('CSV2OPD v1.1.0')
+    GUI(root)
+    root.mainloop()
 
 
 if __name__ == '__main__':
-    """Executes GUI__init__."""
-    root = tk.Tk()
-    root.title('CSV2OPD v1.1.0')
-    gui = GUI(root)
-    root.mainloop()
+    main()
