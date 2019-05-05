@@ -1,7 +1,7 @@
 import unittest
 import glob
 import os
-from csv2opd import DelimiterError, Parser
+from csv2opd.csv2opd import DelimiterError, Parser
 
 
 class CSV2OPDTest(unittest.TestCase):
@@ -23,17 +23,17 @@ class CSV2OPDTest(unittest.TestCase):
 
     def test_delimiter_error(self):
         with self.assertRaises(DelimiterError):
-            Parser(csvFile='input.csv',
-                   xmlFile='.', separator=',')
+            Parser(csvFile='input.csv', xmlFile='.', separator=',')
 
     def test_index_error(self):
-        try:
+        with self.assertRaises(IndexError):
             parser = Parser(csvFile='input_index_error.csv',
                             xmlFile='.', separator=';')
             parser.converter()
-            self.assertGreater(parser.errors, 0)
-        except SystemExit:
-            self.assertRaises(SystemExit)
+
+    def test_oserror(self):
+        with self.assertRaises(OSError):
+            Parser(csvFile='nothing.csv', xmlFile='.', separator=';')
 
 
 if __name__ == 'main':
